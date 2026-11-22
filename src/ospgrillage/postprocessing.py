@@ -10,7 +10,10 @@ module of OpenSeesPy - this module fills in gaps to
 import enum
 import json
 import matplotlib.pyplot as plt
-import opsvis as opsv
+try:
+    import opsvis as opsv
+except Exception:
+    opsv = None
 import numpy as np
 from typing import TYPE_CHECKING, Union
 

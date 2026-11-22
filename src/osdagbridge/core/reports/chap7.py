@@ -1,16 +1,79 @@
-def ch7_quantities(input_dict):
+# =============================================================================
+# Chapter 7: Material Take-off & Quantity Summary
+# Refactored for FOSSEE screening requirements:
+#   - Dynamic Material Quantity Bar Charts (Structural Steel Tonnage, Concrete & Rebar)
+#   - Repeated table headers across page breaks (LongTable endfirsthead/endhead)
+#   - Centralized styling integration
+# =============================================================================
+
+from typing import Optional
+from osdagbridge.core.reports.styles import build_longtable_header
+
+
+def ch7_quantities(
+    input_dict: dict,
+    chart_steel_path: Optional[str] = None,
+    chart_concrete_path: Optional[str] = None
+) -> str:
+    # -------------------------------------------------------------------------
+    # Longtable Header for Table 7.1
+    # -------------------------------------------------------------------------
+    col_hdr = (
+        r"\textbf{S.N.} & \textbf{Item Description} & \textbf{Volume} & "
+        r"\textbf{Quantity} & \textbf{Total Volume} & \textbf{Weight (MT)} & \textbf{Total Weight (MT)} \\"
+    )
+
+    hdr_71 = build_longtable_header(
+        "Bill of Materials (Structural Steel, Concrete, and Reinforcement Quantities)",
+        7,
+        col_hdr,
+        "tab:bill-of-materials"
+    )
+
+    # -------------------------------------------------------------------------
+    # Figure construction for Material Quantity Bar Charts
+    # -------------------------------------------------------------------------
+    chart_blocks = []
+
+    if chart_steel_path:
+        p_steel = chart_steel_path.replace("\\", "/")
+        chart_blocks.append(
+            r"""
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth]{""" + p_steel + r"""}
+\caption{Structural Steel Tonnage Breakdown by Component (IS 2062)}
+\label{fig:chart-steel-tonnage}
+\end{figure}
+"""
+        )
+
+    if chart_concrete_path:
+        p_conc = chart_concrete_path.replace("\\", "/")
+        chart_blocks.append(
+            r"""
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth]{""" + p_conc + r"""}
+\caption{Concrete Volume and Reinforcement Steel Weight Take-Off}
+\label{fig:chart-concrete-rebar}
+\end{figure}
+"""
+        )
+
+    charts_tex = "\n\\vspace{0.8em}\n".join(chart_blocks)
+
     return r"""
 \chapter{Material Take-off \& Quantity Summary}
 \label{ch:material-takeoff}
 
-\noindent\textbf{Table 7.1  Bill of Materials (Steel, Concrete, and Reinforcement Quantities)}
+This section summarizes the material quantities calculated for the superstructure, including structural steel plate girders, cross bracing, end diaphragms, concrete deck slab, reinforcement steel, and shear connectors.
 
+\vspace{0.8em}
 \begingroup
 \setlength{\tabcolsep}{3.5pt}
 \begin{longtable}{|C{1.0cm}|L{3.8cm}|C{2.6cm}|C{1.8cm}|C{1.8cm}|C{1.8cm}|C{1.8cm}|}
-\hline
-\textbf{S.N.} & \textbf{Item Description} & \textbf{Volume} & \textbf{Quantity} & \textbf{Total Volume} & \textbf{Weight (MT)} & \textbf{Total Weight (MT)} \\
-\hline
+""" + hdr_71 + r"""
 1 & Structural Steel (IS 2062) for Girders & """ + str(input_dict.get("steel_girders_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("steel_girders_qty", "N.A.")) + r""" & """ + str(input_dict.get("steel_girders_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("steel_girders_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("steel_girders_wt_total", "N.A.")) + r""" \\
 \hline
 2(a) & Cross Bracing - Top Chord & """ + str(input_dict.get("bracing_top_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("bracing_top_qty", "N.A.")) + r""" & """ + str(input_dict.get("bracing_top_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("bracing_top_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("bracing_top_wt_total", "N.A.")) + r""" \\
@@ -28,6 +91,10 @@ def ch7_quantities(input_dict):
 6 & Crash Barrier & """ + str(input_dict.get("crash_barrier_vol_formula", "N.A.")) + r""" & """ + str(input_dict.get("crash_barrier_qty", "N.A.")) + r""" & """ + str(input_dict.get("crash_barrier_vol_total", "N.A.")) + r""" & """ + str(input_dict.get("crash_barrier_wt_single", "N.A.")) + r""" & """ + str(input_dict.get("crash_barrier_wt_total", "N.A.")) + r""" \\
 \hline
 \end{longtable}
+\endgroup
+
+\section{Material Quantity Charts}
+\label{sec:material-charts}
+
+""" + charts_tex + r"""
 """
-
-

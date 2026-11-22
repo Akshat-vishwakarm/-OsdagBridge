@@ -1,6 +1,9 @@
 import numpy as np
 import plotly.graph_objects as go
-import openseespy.opensees as ops
+try:
+    import openseespy.opensees as ops
+except Exception:
+    ops = None
 
 FORCE_MAP = {
     "Fx": ("Vx_i", "Vx_j"),

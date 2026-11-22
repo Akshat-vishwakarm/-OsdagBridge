@@ -16,7 +16,10 @@ import math
 from typing import List, Tuple, Union, TYPE_CHECKING
 
 import numpy as np
-import openseespy.opensees as ops
+try:
+    import openseespy.opensees as ops
+except Exception:
+    ops = None
 
 from ospgrillage.load import (
     CompoundLoad,

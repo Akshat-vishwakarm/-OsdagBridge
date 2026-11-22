@@ -3,6 +3,7 @@ from typing import List
 from osdagbridge.core.utils.common import (
     KEY_DESIGN_MODE
 )
+from osdagbridge.core.reports.styles import build_longtable_header
 
 
 def ch8_design_log(log_entries: List[str], input_dict: dict) -> str:
@@ -39,6 +40,9 @@ def ch8_design_log(log_entries: List[str], input_dict: dict) -> str:
 
 
 def _ch8_assumptions(is_custom: bool) -> str:
+    hdr_irc = build_longtable_header("IRC Codes", 3, r"\textbf{Code} & \textbf{Year} & \textbf{Title / Scope} \\", "tab:irc-codes")
+    hdr_is = build_longtable_header("IS Codes", 3, r"\textbf{Code} & \textbf{Year} & \textbf{Scope} \\", "tab:is-codes")
+
     assumptions = [
         r"""
 \chapter{Standards \& Assumptions}
@@ -55,14 +59,8 @@ form the basis of all design calculations in this software.
 
 \vspace{0.5cm}
 
-\begingroup
-\setlength{\tabcolsep}{3.5pt}
-\begin{table}[H]
-\caption{\textbf{IRC Codes}}
-\begin{tabular}{|c|c|p{13cm}|}
-\hline
-\textbf{Code} & \textbf{Year} & \textbf{Title / Scope} \\ 
-\hline
+\begin{longtable}{|C{2.5cm}|C{2.0cm}|L{12.0cm}|}
+""" + hdr_irc + r"""
 IRC 5 & 2015 & General Features of Design - carriageway widths, kerb, footpath dimensions \\ 
 \hline
 IRC 6 & 2017 & Loads and Load Combinations - dead load, live load, impact, wind, temperature, etc. \\ 
@@ -75,17 +73,10 @@ IRC 112 & 2020 & Concrete Road Bridges - Deck slab flexure, shear, crack width, 
 \hline
 IRC SP 114 & 2018 & Seismic Design of Road Bridges \\ 
 \hline
-\end{tabular}
-\end{table}
+\end{longtable}
 
-\begingroup
-\setlength{\tabcolsep}{3.5pt}
-\begin{table}[H]
-\caption{\textbf{IS Codes}}
-\begin{tabular}{|c|c|p{13cm}|}
-\hline
-\textbf{Code} & \textbf{Year} & \textbf{Scope} \\
-\hline
+\begin{longtable}{|C{2.5cm}|C{2.0cm}|L{12.0cm}|}
+""" + hdr_is + r"""
 IS 800 & 2007 & Steel construction - tension, compression, bending, shear, LTB, stiffeners, combined checks \\
 \hline
 IS 456 & 2000 & Concrete - simplified stress-block for deck moment capacity \\
@@ -96,8 +87,7 @@ IS 1893 (Part 3) & 2014 & Earthquake resistant design \\
 \hline
 IS 2062 & 2011 & Structural steel - yield and ultimate strength by grade \\
 \hline
-\end{tabular}
-\end{table}
+\end{longtable}
 
 \clearpage
 \section{Analysis and Design Assumptions of This Version}

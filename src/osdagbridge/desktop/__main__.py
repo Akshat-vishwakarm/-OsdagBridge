@@ -286,8 +286,10 @@ def main():
     window = CustomWindow("OsdagBridge", PlateGirderBridge)
     if not icon.isNull():
         window.setWindowIcon(icon)
+    print("[INFO] Showing OsdagBridge main window...", flush=True)
     window.showMaximized()
     window.show()
+    print(f"[INFO] OsdagBridge window visible: {window.isVisible()}, title: {window.windowTitle()}", flush=True)
 
     # Execute the event loop
     sys.exit(app.exec())

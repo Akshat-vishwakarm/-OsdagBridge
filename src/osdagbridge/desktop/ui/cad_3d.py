@@ -23,44 +23,47 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import QTimer, Qt
 
-from OCC.Core.Quantity import Quantity_Color, Quantity_TOC_RGB
-from OCC.Core.AIS import AIS_Shape
-from OCC.Core.gp import gp_Pnt
-from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeSphere
-from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
-from OCC.Display.backend import load_backend
+try:
+    from OCC.Core.Quantity import Quantity_Color, Quantity_TOC_RGB
+    from OCC.Core.AIS import AIS_Shape
+    from OCC.Core.gp import gp_Pnt
+    from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeSphere
+    from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
+    from OCC.Display.backend import load_backend
+    from osdagbridge.core.bridge_types.plate_girder.cad_generator import (
+        PlateGirderCADGenerator
+    )
+    from osdagbridge.desktop.ui.utils.custom_3dviewer import CustomViewer3d
+    _HAS_OCC = True
+except (ImportError, ModuleNotFoundError):
+    _HAS_OCC = False
+    PlateGirderCADGenerator = None
+    CustomViewer3d = None
 
 try:
     from OCC.Core.AIS import AIS_TextLabel
     _HAS_AIS_TEXT = True
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     _HAS_AIS_TEXT = False
 
 # Z-layer constant (resolved once at import time)
 try:
     from OCC.Core.Graphic3d import Graphic3d_ZLayerId_Topmost as _Z_TOP
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     try:
         from OCC.Core.Graphic3d import Graphic3d_ZLayerId_Top as _Z_TOP
-    except ImportError:
+    except (ImportError, ModuleNotFoundError):
         _Z_TOP = None
 
 try:
     from OCC.Core.Aspect import Aspect_TODT_NORMAL as _TODT_NORMAL
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     try:
         from OCC.Core.Aspect import Aspect_TODT_SUBTITLE as _TODT_NORMAL
-    except ImportError:
+    except (ImportError, ModuleNotFoundError):
         _TODT_NORMAL = 0  # numeric fallback
 
-# CAD generator
-from osdagbridge.core.bridge_types.plate_girder.cad_generator import (
-    PlateGirderCADGenerator
-)
 from osdagbridge.core.bridge_types.plate_girder import results_data
-
-# Custom 3D Viewer
-from osdagbridge.desktop.ui.utils.custom_3dviewer import CustomViewer3d
 
 from osdagbridge.core.bridge_types.plate_girder.dto import (
     BridgeParametersDTO,
@@ -78,6 +81,23 @@ class CAD3DWindow(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+
+        if not _HAS_OCC:
+            class _DummyGen:
+                model_data = None
+                def create3Dcad(self): return None
+                def generate(self, *args, **kwargs): return None
+            self.generator = _DummyGen()
+            self.viewer = None
+            self.display = None
+            self._cad_init_pending = False
+            self._cleanup_done = True
+            self.component_selector = QWidget()
+            layout = QVBoxLayout(self)
+            lbl = QLabel("3D CAD View\n\n(pythonocc-core is required for interactive 3D CAD modeling)", self)
+            lbl.setAlignment(Qt.AlignCenter)
+            layout.addWidget(lbl)
+            return
 
         # CAD generator
         self.generator = PlateGirderCADGenerator()
